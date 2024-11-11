@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puppy Adoption Form</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+ <div class="form-content">
+    <h2>Puppy Adoption Form</h2>
+    <form>
+      <h3>YOUR CONTACT INFORMATION</h3>
+      <label>First Name</label>
+      <input type="text">
+      <label>Last Name</label>
+      <input type="text">
+      <label>Address</label>
+      <input type="text">
+      <label>City/State</label>
+      <input type="text">
+      <label>Zipcode</label>
+      <input type="text">
+      <label>Phone</label>
+      <input type="text">
+      <label>Email</label>
+      <input type="email">
+
+      <h3>YOUR HOME</h3>
+      <label>What type of housing do you live in?</label>
+      <div class="checkbox-group">
+        <input type="checkbox"> Apartment
+        <input type="checkbox"> House
+        <input type="checkbox"> Others <input type="text">
+      </div>
+      
+      <label>Do you rent this property? If yes, fill the landlord's name</label>
+      <div class="checkbox-group">
+        <input type="checkbox"> No
+        <input type="checkbox"> Yes, Landlord's Name <input type="text">
+      </div>
+
+      <h3>GENERAL INFORMATION</h3>
+      <label>Why do you want to adopt this pet?</label>
+      <div class="checkbox-group">
+        <input type="checkbox"> Companion for child
+        <input type="checkbox"> Companion for other pet
+        <input type="checkbox"> Companion for self
+        <input type="checkbox"> Service animal
+        <input type="checkbox"> Security
+        <input type="checkbox"> House pet
+        <input type="checkbox"> Breeding
+        <input type="checkbox"> Others <input type="text">
+      </div>
+      
+      <label>Have you previously owned pets?</label>
+      <div class="checkbox-group">
+        <input type="checkbox"> No
+        <input type="checkbox"> Yes
+      </div>
+      
+      <label>Please list any animals you have currently or have had in the past five years</label>
+      <textarea></textarea>
+      
+      <label>I hereby agree to adopt the animals and take good care of them</label>
+      <div class="checkbox-group">
+        <input type="checkbox"> Agree
+      </div>
+
+      <h3>PET INFORMATION</h3>
+      <label>Pet ID#</label>
+      <input type="text">
+      <label>Breed</label>
+      <input type="text">
+      <label>Age/Sex</label>
+      <input type="text">
+      <label>Approved</label>
+      <input type="text">
+      <label>Date</label>
+      <input type="date">
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

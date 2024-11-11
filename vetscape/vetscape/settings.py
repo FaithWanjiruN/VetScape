@@ -107,7 +107,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
+    BASE_DIR / "static",
 ]
 
 MEDIA_URL = 'images/'
@@ -121,3 +121,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+GOOGLE_MAPS_API_KEY = 'AIzaSyBdeNkSk1mOYP-wg_GLKo4hwmZwl3DskXs'
