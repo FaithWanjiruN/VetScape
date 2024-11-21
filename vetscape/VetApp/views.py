@@ -107,6 +107,3 @@ def nearby_clinics(request):
 
     # Return the list of clinics as JSON
     return JsonResponse({'clinics': clinics})
-
-def form(request):
-    return render(request, 'form.html')

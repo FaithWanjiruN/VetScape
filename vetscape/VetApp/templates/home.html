@@ -224,35 +224,6 @@
   align-items: center;
 }
 
-.clinic-cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.clinic-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 16px;
-  width: 300px;
-  background-color: #fff;
-}
-
-.clinic-card h3 {
-  font-size: 1.25em;
-  margin-bottom: 8px;
-}
-
-.clinic-card p {
-  margin: 4px 0;
-}
-
-.clinic-card .address {
-  font-style: italic;
-  color: #666;
-}
 
 
 
@@ -824,55 +795,44 @@ document.querySelector('.adopt-btn2').addEventListener('click', function(event) 
   openThankYouModal();
 });
 
-async function getLocationAndFetchClinics() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async function (position) {
+  function getLocationAndFetchClinics() {
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(success, error);
+      } else {
+          alert("Geolocation is not supported by this browser.");
+      }
+  }
+
+  function success(position) {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
-
-      // Clear previous results
-      const container = document.getElementById('clinicCardsContainer');
-      container.innerHTML = '';
-
-      // Fetch clinic data from the backend with latitude and longitude
-      const response = await fetch(`/api/clinics?latitude=${latitude}&longitude=${longitude}`);
-      const clinics = await response.json();
-
-      // Check if clinics are returned
-      if (clinics.length === 0) {
-        container.innerHTML = '<p>No clinics found nearby.</p>';
-        return;
-      }
-
-      // Display each clinic in a card
-      clinics.forEach(clinic => {
-        const card = document.createElement('div');
-        card.className = 'clinic-card';
-
-        // Clinic name
-        const name = document.createElement('h3');
-        name.innerText = clinic.name;
-        card.appendChild(name);
-
-        // Location status
-        const location = document.createElement('p');
-        location.innerText = `Location: ${clinic.location || 'Nearby'}`;
-        card.appendChild(location);
-
-        // Address
-        const address = document.createElement('p');
-        address.className = 'address';
-        address.innerText = `Address: ${clinic.address || 'Not available'}`;
-        card.appendChild(address);
-
-        // Append the card to the container
-        container.appendChild(card);
-      });
-    });
-  } else {
-    alert("Geolocation is not supported by this browser.");
+      
+      // Send the location data to the Django backend
+      fetchClinicsByLocation(latitude, longitude);
   }
-}
+
+  function error() {
+      alert("Unable to retrieve your location");
+  }
+
+  function fetchClinicsByLocation(lat, lng) {
+      fetch(`/clinics/nearby/?lat=${lat}&lng=${lng}`)
+          .then(response => response.json())
+          .then(data => {
+              // Update the clinic list with the results
+              let clinicList = document.getElementById("clinic-list");
+              clinicList.innerHTML = ""; // Clear the existing list
+              data.clinics.forEach(clinic => {
+                  clinicList.innerHTML += `
+                      <div class="clinic">
+                          <h2>${clinic.name}</h2>
+                          <p>Location: ${clinic.location}</p>
+                          <p>Address: ${clinic.address}</p>
+                      </div>`;
+              });
+          })
+          .catch(error => console.error('Error:', error));
+  }
 
 </script>
 
