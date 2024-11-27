@@ -11,11 +11,11 @@ import datetime
 from django.contrib import messages
 
 def home(request):
-    return render(request, 'home.html') 
+    return render(request, 'index.html') 
 
 @login_required(login_url='login')
 def home(request):
-    return render (request,'home.html')
+    return render (request,'index.html')
 
 
 def signup(request):
@@ -48,14 +48,14 @@ def user_login(request):
         user=authenticate(request,username=username,password=pass1)
         if user is not None:
             login(request,user)
-            return redirect('home')
+            return redirect('index')
         else:
             return HttpResponse ("Username or Password is incorrect!!!")
 
     return render (request,'login.html')
 
 def  logout(request):
-    return redirect('home')
+    return redirect('index')
 
 
 from django.conf import settings
