@@ -27,6 +27,7 @@ class Clinic(models.Model):
     address = models.CharField(max_length=255, blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+    image = models.ImageField(upload_to='clinic_images/', blank=True, null=True)  # Add this field
 
     def __str__(self):
         return f"{self.name} - {self.location}"

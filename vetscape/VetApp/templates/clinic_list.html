@@ -1,0 +1,13 @@
+<div class="clinic-cards">
+    {% if clinics %}
+        {% for clinic in clinics %}
+        <div class="clinic-card">
+            <h3>{{ clinic.name }}</h3>
+            <p><strong>Location:</strong> {{ clinic.location }}</p>
+            <p><strong>Address:</strong> {{ clinic.address }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No clinics found for the selected location.</p>
+    {% endif %}
+</div>

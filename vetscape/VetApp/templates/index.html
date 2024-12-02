@@ -573,64 +573,32 @@
             <span class="span">Nearest</span> Vet Centers
           </h2>
           <h3 class="h2 section-title" style="font-size: 20px;"> Let's help you find the nearest centers </h3>
-          <form method="get">
-            <label for="location">Select a Location:</label>
-            <select id="location" name="location" onchange="this.form.submit()">
-                <option value="">All Locations</option>
-                <option value="Westlands" {% if selected_location == "Westlands" %}selected{% endif %}>Westlands</option>
-                <option value="Kasarani" {% if selected_location == "Kasarani" %}selected{% endif %}>Kasarani</option>
-                <option value="Embakasi" {% if selected_location == "Embakasi" %}selected{% endif %}>Embakasi</option>
-                <option value="Langata" {% if selected_location == "Langata" %}selected{% endif %}>Langata</option>
-            </select>
-        </form>
-    
-        <div class="clinic-cards">
-          {% for clinic in clinics %}
-          <div class="clinic-card">
-              <h3>{{ clinic.name }}</h3>
-              <p><strong>Location:</strong> {{ clinic.location }}</p>
-              <p><strong>Address:</strong> {{ clinic.address }}</p>
-          </div>
-          {% endfor %}
-      </div>
-      
+          
+          <!-- Location Dropdown -->
+<form method="get">
+  <label for="location">Select a Location:</label>
+  <select id="location" name="location" onchange="fetchClinicsByLocation(this.value)">
+      <option value="">All Locations</option>
+      <option value="Westlands">Westlands</option>
+      <option value="Kasarani">Kasarani</option>
+      <option value="Embakasi">Embakasi</option>
+      <option value="Langata">Langata</option>
+  </select>
+</form>
 
-          <div class="center-container">
-            <ul class="has-scrollbar">
+<!-- "Find Clinics Near Me" Button -->
+<div class="center-container">
+  <button class="adopt-btn" onclick="getLocationAndFetchClinics()">Find Clinics Near Me</button>
+</div>
 
-            <li class="scrollbar-item">
-              <div class="category-card">
+<!-- Dynamic Clinic List -->
+<div class="center-container">
+  <ul class="has-scrollbar" id="clinic-list">
+      <!-- Clinics will be dynamically loaded here -->
+  </ul>
+</div>
 
-                <figure class="card-banner img-holder" style="--width: 330; --height: 300;">
-                  <img src="../static/images/clinic1.jpg" width="330" height="300" loading="lazy" alt="clinic1"
-                    class="img-cover">
-                </figure>
-
-                <h3 class="h3">
-                  <a href="" class="card-title">Pawfect Veterinary Clinic</a>
-                </h3>
-
-              </div>
-            </li>
-
-            <li class="scrollbar-item">
-              <div class="category-card">
-
-                <figure class="card-banner img-holder" style="--width: 330; --height: 300;">
-                  <img src="../static/images/clinic2.jpg" width="330" height="300" loading="lazy" alt="clinic2"
-                    class="img-cover">
-                </figure>
-
-                <h3 class="h3">
-                  <a href="" class="card-title">Dash <br>Garden Veterinary Services</a>
-                </h3>
-
-              </div>
-            </li>
-            </ul>
-            <button class="adopt-btn" onclick="getLocationAndFetchClinics()">Find Clinics Near Me</button>
-            <div id="clinicCardsContainer" class="clinic-cards-container"></div>
-          </div>
+        
           </section>      
         </div>
     </article>
@@ -795,44 +763,95 @@ document.querySelector('.adopt-btn2').addEventListener('click', function(event) 
   openThankYouModal();
 });
 
-  function getLocationAndFetchClinics() {
-      if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(success, error);
-      } else {
-          alert("Geolocation is not supported by this browser.");
-      }
-  }
+  // Fetch clinics by location from dropdown
+function fetchClinicsByLocation(location) {
+    const clinicList = document.getElementById('clinic-list');
+    clinicList.innerHTML = '<li>Loading clinics...</li>'; // Display a loading message
 
-  function success(position) {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-      
-      // Send the location data to the Django backend
-      fetchClinicsByLocation(latitude, longitude);
-  }
+    fetch(`/clinics/?location=${location}`)
+        .then(response => response.json()) // Expect JSON data from the backend
+        .then(data => {
+            clinicList.innerHTML = ''; // Clear the loading message
+            if (data.clinics.length > 0) {
+                data.clinics.forEach(clinic => {
+                    clinicList.innerHTML += `
+                        <li class="scrollbar-item">
+                            <div class="category-card">
+                                <figure class="card-banner img-holder" style="--width: 330; --height: 300;">
+                                    <img src="../static/images/clinic_placeholder.jpg" 
+                                         width="330" height="300" 
+                                         loading="lazy" 
+                                         alt="${clinic.name}" 
+                                         class="img-cover">
+                                </figure>
+                                <h3 class="h3">
+                                    <a href="" class="card-title">${clinic.name}</a>
+                                </h3>
+                                <p><strong>Address:</strong> ${clinic.address}</p>
+                            </div>
+                        </li>`;
+                });
+            } else {
+                clinicList.innerHTML = '<li>No clinics found for the selected location.</li>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching clinics:', error);
+            clinicList.innerHTML = '<li>Failed to load clinics. Please try again later.</li>';
+        });
+}
 
-  function error() {
-      alert("Unable to retrieve your location");
-  }
+// Fetch nearby clinics using geolocation
+function getLocationAndFetchClinics() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error);
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
 
-  function fetchClinicsByLocation(lat, lng) {
-      fetch(`/clinics/nearby/?lat=${lat}&lng=${lng}`)
-          .then(response => response.json())
-          .then(data => {
-              // Update the clinic list with the results
-              let clinicList = document.getElementById("clinic-list");
-              clinicList.innerHTML = ""; // Clear the existing list
-              data.clinics.forEach(clinic => {
-                  clinicList.innerHTML += `
-                      <div class="clinic">
-                          <h2>${clinic.name}</h2>
-                          <p>Location: ${clinic.location}</p>
-                          <p>Address: ${clinic.address}</p>
-                      </div>`;
-              });
-          })
-          .catch(error => console.error('Error:', error));
-  }
+function success(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+
+    // Send the location data to the Django backend
+    fetch(`/clinics/nearby/?lat=${latitude}&lng=${longitude}`)
+        .then(response => response.json())
+        .then(data => {
+            const clinicList = document.getElementById('clinic-list');
+            clinicList.innerHTML = ''; // Clear the list
+            if (data.clinics.length > 0) {
+                data.clinics.forEach(clinic => {
+                    clinicList.innerHTML += `
+                        <li class="scrollbar-item">
+                            <div class="category-card">
+                                <figure class="card-banner img-holder" style="--width: 330; --height: 300;">
+                                    <img src="../static/images/clinic_placeholder.jpg" 
+                                         width="330" height="300" 
+                                         loading="lazy" 
+                                         alt="${clinic.name}" 
+                                         class="img-cover">
+                                </figure>
+                                <h3 class="h3">
+                                    <a href="" class="card-title">${clinic.name}</a>
+                                </h3>
+                                <p><strong>Address:</strong> ${clinic.address}</p>
+                            </div>
+                        </li>`;
+                });
+            } else {
+                clinicList.innerHTML = '<li>No nearby clinics found.</li>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching nearby clinics:', error);
+            clinicList.innerHTML = '<li>Failed to load nearby clinics. Please try again later.</li>';
+        });
+}
+
+function error() {
+    alert("Unable to retrieve your location.");
+}
 
 </script>
 

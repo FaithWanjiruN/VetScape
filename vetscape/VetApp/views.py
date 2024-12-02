@@ -64,15 +64,23 @@ api_key = settings.GOOGLE_MAPS_API_KEY
 
 # views.py
 from django.shortcuts import render
+
+from django.http import JsonResponse
 from .models import Clinic
 
 def clinic_list(request):
     location = request.GET.get('location')
-    if location:
-        clinics = Clinic.objects.filter(location=location)
-    else:
-        clinics = Clinic.objects.all()
-    return render(request, 'clinic_list.html', {'clinics': clinics, 'selected_location': location})
+    clinics = Clinic.objects.filter(location=location) if location else Clinic.objects.all()
+
+    clinic_data = [
+        {
+            "name": clinic.name,
+            "address": clinic.address,
+        }
+        for clinic in clinics
+    ]
+    return JsonResponse({'clinics': clinic_data})
+
 
 import requests
 from django.http import JsonResponse
@@ -83,11 +91,10 @@ def nearby_clinics(request):
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
 
-    # Example: Google Maps Places API endpoint for finding nearby vet clinics
     places_url = (
         "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
         f"?location={lat},{lng}"
-        "&radius=5000"  # within 5 km
+        "&radius=5000"
         "&type=veterinary_care"
         f"&key={settings.GOOGLE_MAPS_API_KEY}"
     )
@@ -95,15 +102,13 @@ def nearby_clinics(request):
     response = requests.get(places_url)
     data = response.json()
 
-    # Extract relevant information from API response
-    clinics = []
-    for place in data.get("results", []):
-        clinic = {
+    clinics = [
+        {
             "name": place.get("name"),
             "address": place.get("vicinity"),
-            "location": "Nearby"  # Mark it as "Nearby" instead of a fixed location name
         }
-        clinics.append(clinic)
+        for place in data.get("results", [])
+    ]
 
-    # Return the list of clinics as JSON
     return JsonResponse({'clinics': clinics})
+
