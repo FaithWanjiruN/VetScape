@@ -1,0 +1,21 @@
+from django import forms
+
+class AdoptionForm(forms.Form):
+    first_name = forms.CharField(label='First Name', max_length=100)
+    last_name = forms.CharField(label='Last Name', max_length=100)
+    address = forms.CharField(label='Address', max_length=200)
+    city_state = forms.CharField(label='City/State', max_length=200)
+    zipcode = forms.CharField(label='Zipcode', max_length=20)
+    phone = forms.CharField(label='Phone', max_length=20)
+    email = forms.EmailField(label='Email')
+    housing_type = forms.ChoiceField(choices=[('apartment', 'Apartment'), ('house', 'House'), ('other', 'Other')], label="Housing Type")
+    rent_property = forms.ChoiceField(choices=[('yes', 'Yes'), ('no', 'No')], label="Do you rent this property?")
+    pet_reason = forms.CharField(label='Why do you want to adopt this pet?', widget=forms.Textarea)
+    has_pets = forms.BooleanField(label='Have you previously owned pets?', required=False)
+    current_pets = forms.CharField(label='Please list any animals you have currently or have had in the past five years', widget=forms.Textarea)
+    agree = forms.BooleanField(label='I hereby agree to adopt the animals and take good care of them', required=True)
+    pet_id = forms.CharField(label='Pet ID#', max_length=100)
+    breed = forms.CharField(label='Breed', max_length=100)
+    age_sex = forms.CharField(label='Age/Sex', max_length=100)
+    approved = forms.CharField(label='Approved', max_length=100)
+    adoption_date = forms.DateField(label='Date', widget=forms.DateInput())

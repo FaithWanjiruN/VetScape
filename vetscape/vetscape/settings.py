@@ -123,3 +123,14 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 GOOGLE_MAPS_API_KEY = 'AIzaSyBdeNkSk1mOYP-wg_GLKo4hwmZwl3DskXs'
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Use your SMTP server
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'fwanjiru84@gmail.com'  # Your email
+EMAIL_HOST_PASSWORD = 'hqxmxyqsvoxf hznm'  # Your email password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+

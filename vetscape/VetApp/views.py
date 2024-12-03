@@ -70,31 +70,38 @@ from .models import Clinic
 
 def clinic_list(request):
     location = request.GET.get('location')
-    clinics = Clinic.objects.filter(location=location) if location else Clinic.objects.all()
+    clinics = Clinic.objects.all()
 
-    clinic_data = [
-        {
+    if location:
+        clinics = clinics.filter(location=location)
+
+    clinic_data = []
+    for clinic in clinics:
+        clinic_data.append({
             "name": clinic.name,
             "address": clinic.address,
-        }
-        for clinic in clinics
-    ]
+            "location": clinic.location,
+            "image_url": clinic.image.url if clinic.image else '',  # Ensure that we include the image URL
+        })
+
     return JsonResponse({'clinics': clinic_data})
 
+
+from .models import Clinic
 
 import requests
 from django.http import JsonResponse
 from django.conf import settings
-from .models import Clinic
 
 def nearby_clinics(request):
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
 
+    # Example: Google Maps Places API endpoint for finding nearby vet clinics
     places_url = (
         "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
         f"?location={lat},{lng}"
-        "&radius=5000"
+        "&radius=5000"  # within 5 km
         "&type=veterinary_care"
         f"&key={settings.GOOGLE_MAPS_API_KEY}"
     )
@@ -102,13 +109,61 @@ def nearby_clinics(request):
     response = requests.get(places_url)
     data = response.json()
 
-    clinics = [
-        {
+    # Extract relevant information from API response
+    clinics = []
+    for place in data.get("results", []):
+        # Fetch additional place details to get image
+        place_id = place.get("place_id")
+        details_url = (
+            "https://maps.googleapis.com/maps/api/place/details/json"
+            f"?placeid={place_id}"
+            f"&key={settings.GOOGLE_MAPS_API_KEY}"
+        )
+        details_response = requests.get(details_url)
+        details_data = details_response.json()
+        image_reference = details_data.get("result", {}).get("photos", [{}])[0].get("photo_reference", None)
+        
+        # Construct image URL from the photo_reference if available
+        if image_reference:
+            image_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={image_reference}&key={settings.GOOGLE_MAPS_API_KEY}"
+        else:
+            image_url = "https://via.placeholder.com/400"  # Default placeholder if no image is available
+
+        clinic = {
             "name": place.get("name"),
             "address": place.get("vicinity"),
+            "location": "Nearby",  # Mark it as "Nearby" instead of a fixed location name
+            "image_url": image_url,
         }
-        for place in data.get("results", [])
-    ]
+        clinics.append(clinic)
 
+    # Return the list of clinics with images as JSON
     return JsonResponse({'clinics': clinics})
 
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.conf import settings
+
+def send_adoption_email(request):
+    if request.method == 'POST':
+        # Get form data (you may want to validate these)
+        first_name = request.POST.get('firstName')
+        last_name = request.POST.get('lastName')
+        email = request.POST.get('email')
+
+        # Compose the email content
+        subject = 'Adoption Form Submission'
+        message = f"Thank you for submitting the adoption form, {first_name} {last_name}.\n\n" \
+                  "Please visit the location for further instructions."
+
+        # Send the email
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,  # You need to configure this in settings.py
+            [email],  # Send to the user's email address
+        )
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})

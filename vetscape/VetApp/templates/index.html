@@ -331,7 +331,7 @@
               <div class="category-card">
 
             <!-- Card Structure -->
-            <figure class="card-banner img-holder" data-image="../static/images/dog1.jpg" data-breed="Seberian Husky"  data-id="12345" data-status="Vaccinated"data-fact="Scout loves playing fetch!Scout loves playing fetch" onclick="openModal(this)">
+            <figure class="card-banner img-holder" data-image="../static/images/dog1.jpg" data-breed="Seberian Husky"  data-id="56721" data-status="Vaccinated"data-fact="Scout loves playing fetch and swimming in pools and lakes!" onclick="openModal(this)">
               <img src="../static/images/dog1.jpg" width="330" height="300" loading="lazy" alt="Scout" class="img-cover">
             </figure>
 
@@ -352,24 +352,27 @@
                 <h2 class="h2 section-title">
                   <span class="span">Dog</span>  Adoption Form
                 </h2>
-                <form>
+
+                <form id="adoptionForm" method="POST">
+                  {% csrf_token %}
                   <h3 class="h3 section-title">
                     Your Contact <span class="span">Information</span>
                   </h3>
                   <label>First Name</label>
-                  <input type="text">
+                  <input type="text" name="firstName" required>
                   <label>Last Name</label>
-                  <input type="text">
+                  <input type="text" name="lastName" required>
                   <label>Address</label>
-                  <input type="text">
+                  <input type="text"required>
                   <label>City/State</label>
-                  <input type="text">
+                  <input type="text"required>
                   <label>Zipcode</label>
-                  <input type="text">
-                  <label>Phone</label>
-                  <input type="text">
+                  <input type="text"required>
+                  <label>Phone</label required>
+                  <input type="text"required>
                   <label>Email</label>
-                  <input type="email">
+                  <input type="email"required oninvalid="this.setCustomValidity('Please enter a valid email address.')"
+                  oninput="this.setCustomValidity('')">
             
                   <h3 class="h3 section-title">
                     Your <span class="span">Home</span>
@@ -413,23 +416,26 @@
                   <br>
                   <label>I hereby agree to adopt the animals and take good care of them</label>
                   <div class="checkbox-group">
-                    <input type="checkbox"> Agree
+                    <input type="checkbox"required> Agree
                   </div>
                   <h3 class="h3 section-title">
                     Pet <span class="span">Information</span>
                   </h3>
                   <label>Pet ID#</label>
-                  <input type="text">
+                  <input type="text"required>
                   <label>Breed</label>
-                  <input type="text">
+                  <input type="text"required>
                   <label>Age/Sex</label>
-                  <input type="text">
+                  <input type="text"required>
                   <label>Approved</label>
-                  <input type="text">
+                  <input type="text"required>
                   <label>Date</label>
-                  <input type="date">
+                  <input type="date"required>
+
+                  
             
-                  <button class="adopt-btn2" style="margin-left: 300px;">Submit</button>
+                  <button type="submit">Submit</button>
+                  
                   <!-- Thank You Modal -->
                   <div id="thankYouModal" class="modal">
                     <div class="modal-content thank-you-content">
@@ -702,8 +708,119 @@
     - custom js link
   -->
   <script src="../static/js/script.js" defer></script>
-  <!-- clinic_list.html -->
 <script>
+// Open the modal and populate it with data from the clicked figure
+function openModal(element) {
+    const imageSrc = element.getAttribute("data-image");
+    const petBreed = element.getAttribute("data-breed");
+    const petId = element.getAttribute("data-id");
+    const petStatus = element.getAttribute("data-status");
+    const petFact = element.getAttribute("data-fact");
+  
+    // Populate modal content with the data
+    document.getElementById("modalImage").src = imageSrc;
+    document.getElementById("modalText").innerHTML = `
+      Breed: ${petBreed}<br>
+      ID: ${petId}<br>
+      Status: ${petStatus}<br>
+      Fact: ${petFact}
+    `;
+  
+    document.getElementById("modal").style.display = "flex";
+  }
+  
+  // Close the first modal
+  function closeModal() {
+    document.getElementById("modal").style.display = "none";
+  }
+  
+  // Open the form modal and close the first modal
+  function openFormModal() {
+    closeModal();
+    document.getElementById("formModal").style.display = "flex";
+  }
+  
+  // Close the form modal
+  function closeFormModal() {
+    document.getElementById("formModal").style.display = "none";
+  }
+  
+  // Open the Thank You modal
+  function openThankYouModal() {
+    document.getElementById("thankYouModal").style.display = "flex";
+  }
+  
+  // Close the Thank You modal
+  function closeThankYouModal() {
+    document.getElementById("thankYouModal").style.display = "none";
+    document.getElementById("formModal").style.display = "none";
+  }
+  
+  // Add event listener to form submission
+document.querySelector('form').addEventListener('submit', function (event) {
+  event.preventDefault(); // Prevent default form submission
+
+  // Check if the form is valid
+  if (this.checkValidity()) {
+    openThankYouModal(); // Open the Thank You modal
+    this.reset(); // Reset the form after successful submission
+    document.querySelector('.adopt-btn2').disabled = true; // Disable submit button after reset
+  } else {
+    // Alert user and focus on the first invalid field
+    alert('Please fill in all required fields correctly!');
+    const firstInvalidField = this.querySelector(':invalid');
+    if (firstInvalidField) {
+      firstInvalidField.focus();
+    }
+  }
+});
+
+// Disable the submit button until the form is valid
+const form = document.querySelector('form');
+const submitButton = document.querySelector('.adopt-btn2');
+submitButton.disabled = true; // Disable the button initially
+
+form.addEventListener('input', function () {
+  submitButton.disabled = !this.checkValidity(); // Enable/disable button based on form validity
+});
+
+  // Validate checkbox groups
+  function validateCheckboxGroup(groupSelector) {
+    const checkboxes = document.querySelectorAll(groupSelector);
+    return Array.from(checkboxes).some(checkbox => checkbox.checked);
+  }
+  
+  // Add custom validation for checkbox groups and display feedback
+  form.addEventListener('submit', function (event) {
+    const housingValid = validateCheckboxGroup('input[name="housingType"]');
+    if (!housingValid) {
+      alert('Please select at least one housing type.');
+      event.preventDefault();
+      return;
+    }
+  });
+  
+  // Add custom validation message for email field
+  document.querySelector('input[type="email"]').addEventListener('input', function () {
+    if (this.validity.typeMismatch) {
+      this.setCustomValidity('Please enter a valid email address.');
+    } else {
+      this.setCustomValidity('');
+    }
+  });
+  
+  // Close modals if clicked outside their content
+  window.onclick = function (event) {
+    if (event.target == document.getElementById("modal")) {
+      closeModal();
+    } else if (event.target == document.getElementById("formModal")) {
+      closeFormModal();
+    } else if (event.target == document.getElementById("thankYouModal")) {
+      closeThankYouModal();
+    }
+  };
+  
+
 // Function to open the modal and populate it with data from the clicked figure
 function openModal(element) {
   // Get data attributes from the clicked figure element
@@ -810,6 +927,33 @@ function getLocationAndFetchClinics() {
     }
 }
 
+function fetchClinicsByLocation(location) {
+    fetch(`/clinics/?location=${location}`)
+        .then(response => response.json())
+        .then(data => {
+            let clinicList = document.getElementById("clinic-list");
+            clinicList.innerHTML = "";  // Clear the existing list
+
+            data.clinics.forEach(clinic => {
+                let clinicHTML = `
+                    <li class="scrollbar-item">
+                        <div class="category-card">
+                            <figure class="card-banner img-holder" style="--width: 330; --height: 300;">
+                                <img src="${clinic.image_url}" width="330" height="300" loading="lazy" alt="${clinic.name}" class="img-cover">
+                            </figure>
+                            <h3 class="h3">
+                                <a href="" class="card-title">${clinic.name}</a>
+                            </h3>
+                            <p>${clinic.address}</p>
+                        </div>
+                    </li>`;
+                clinicList.innerHTML += clinicHTML;
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+
 function success(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
@@ -853,16 +997,74 @@ function error() {
     alert("Unable to retrieve your location.");
 }
 
+
+document.getElementById("adoptionForm").addEventListener("submit", function (event) {
+    // Get all input elements with the 'required' attribute
+    const requiredFields = this.querySelectorAll("input[required], textarea[required]");
+    let allValid = true;
+
+    // Check each field
+    requiredFields.forEach(field => {
+      if (!field.value.trim()) {
+        allValid = false;
+        // Highlight the field and show an error message
+        field.style.border = "2px solid red";
+        field.setAttribute("placeholder", "This field is required");
+      } else {
+        field.style.border = ""; // Reset border if valid
+      }
+    });
+
+    // Prevent form submission if not all fields are valid
+    if (!allValid) {
+      event.preventDefault();
+      alert("Please fill out all required fields.");
+    }
+  });
+  
+
+  document.getElementById('adoptionForm').addEventListener('submit', function(event) {
+  event.preventDefault(); // Prevent the default form submission
+
+  // Collect form data
+  var formData = new FormData(this);
+
+  // Get CSRF token from cookies
+  var csrfToken = getCookie('csrftoken'); // Ensure getCookie function is correctly defined
+
+  // Send the form data to the Django server
+  fetch('/send-adoption-email/', {  // Change this URL to your Django view
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken // CSRF token in headers
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Display thank you modal on success
+      document.getElementById('thankYouModal').style.display = 'block';
+    } else {
+      alert('There was an error. Please try again.');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('There was an error. Please try again.');
+  });
+});
+
+
 </script>
-
-
 
   <!-- 
     - ionicon link
   -->
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-
+ 
+    
 </body>
 
 </html>
