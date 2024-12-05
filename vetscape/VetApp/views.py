@@ -93,51 +93,64 @@ import requests
 from django.http import JsonResponse
 from django.conf import settings
 
+from django.http import JsonResponse
+import requests
+from django.conf import settings
+
 def nearby_clinics(request):
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
 
-    # Example: Google Maps Places API endpoint for finding nearby vet clinics
+    if not lat or not lng:
+        return JsonResponse({'error': 'Latitude and longitude are required'}, status=400)
+
+    # Google Maps Places API endpoint for finding nearby clinics
     places_url = (
         "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
         f"?location={lat},{lng}"
-        "&radius=5000"  # within 5 km
-        "&type=veterinary_care"
+        "&radius=5000"  # Search within 5 km
+        "&type=veterinary_care"  # Type of place
         f"&key={settings.GOOGLE_MAPS_API_KEY}"
     )
 
     response = requests.get(places_url)
+    if response.status_code != 200:
+        return JsonResponse({'error': 'Failed to fetch places from Google Maps API'}, status=response.status_code)
+
     data = response.json()
 
-    # Extract relevant information from API response
+    # Extract relevant clinic information
     clinics = []
     for place in data.get("results", []):
-        # Fetch additional place details to get image
+        place_name = place.get("name")
+        vicinity = place.get("vicinity")
         place_id = place.get("place_id")
-        details_url = (
-            "https://maps.googleapis.com/maps/api/place/details/json"
-            f"?placeid={place_id}"
-            f"&key={settings.GOOGLE_MAPS_API_KEY}"
-        )
-        details_response = requests.get(details_url)
-        details_data = details_response.json()
-        image_reference = details_data.get("result", {}).get("photos", [{}])[0].get("photo_reference", None)
-        
-        # Construct image URL from the photo_reference if available
-        if image_reference:
-            image_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={image_reference}&key={settings.GOOGLE_MAPS_API_KEY}"
+
+        # Attempt to retrieve the photo reference for images
+        photo_reference = None
+        photos = place.get("photos", [])
+        if photos:
+            photo_reference = photos[0].get("photo_reference")
+
+        # Construct the image URL from the photo reference if available
+        if photo_reference:
+            image_url = (
+                f"https://maps.googleapis.com/maps/api/place/photo"
+                f"?maxwidth=400"
+                f"&photoreference={photo_reference}"
+                f"&key={settings.GOOGLE_MAPS_API_KEY}"
+            )
         else:
-            image_url = "https://via.placeholder.com/400"  # Default placeholder if no image is available
+            image_url = "https://via.placeholder.com/400"  # Default placeholder
 
-        clinic = {
-            "name": place.get("name"),
-            "address": place.get("vicinity"),
-            "location": "Nearby",  # Mark it as "Nearby" instead of a fixed location name
+        # Append clinic data
+        clinics.append({
+            "name": place_name,
+            "address": vicinity,
+            "location": "Nearby",
             "image_url": image_url,
-        }
-        clinics.append(clinic)
+        })
 
-    # Return the list of clinics with images as JSON
     return JsonResponse({'clinics': clinics})
 
 from django.core.mail import send_mail

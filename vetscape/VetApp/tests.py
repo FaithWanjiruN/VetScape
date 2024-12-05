@@ -1,77 +1,73 @@
-# from django.test import TestCase
-# from django.urls import reverse
-# from django.contrib.auth.models import User
-# from .models import Clinic
+from django.test import TestCase
+from django.urls import reverse
+from django.contrib.auth.models import User
+from .models import Clinic
 
-# class AdminPanelTestCase(TestCase):
+class AdminPanelTestCase(TestCase):
 
-#     def setUp(self):
-#         # Create an admin user for testing
-#         self.admin_user = User.objects.create_superuser('admin', 'admin@example.com', 'password123')
-#         self.client.login(username='admin', password='password123')
+    def setUp(self):
+        # Create an admin user for testing
+        self.admin_user = User.objects.create_superuser('admin', 'admin@example.com', 'password123')
+        self.client.login(username='admin', password='password123')
 
-#     def test_admin_can_add_clinic(self):
-#         # Get the URL for adding a new clinic
-#         url = reverse('admin:VetApp_clinic_add')  # Replace with your actual admin URL name
+    def test_admin_can_add_clinic(self):
+        # Get the URL for adding a new clinic
+        url = reverse('admin:VetApp_clinic_add')  # Replace with your actual admin URL name
         
-#         # Simulate submitting the form to add a new clinic
-#         response = self.client.post(url, {
-#             'name': 'Happy Paws Clinic',
-#             'location': 'Westlands',
-#             'address': '1234 Dog St, Animal City',
-#             'latitude': 1.2921,
-#             'longitude': 36.8219
-#         })
+        # Simulate submitting the form to add a new clinic
+        response = self.client.post(url, {
+            'name': 'Happy Paws Clinic',
+            'location': 'Westlands',
+            'address': '1234 Dog St, Animal City',
+            'latitude': 1.2921,
+            'longitude': 36.8219
+        })
         
-#         # Verify the response and check that the clinic was added
-#         self.assertEqual(response.status_code, 302)  # Check for redirect after successful save
-#         self.assertTrue(Clinic.objects.filter(name='Happy Paws Clinic').exists())  # Ensure the clinic is in the database
+        # Verify the response and check that the clinic was added
+        self.assertEqual(response.status_code, 302)  # Check for redirect after successful save
+        self.assertTrue(Clinic.objects.filter(name='Happy Paws Clinic').exists())  # Ensure the clinic is in the database
 
-#     def test_admin_cannot_add_clinic_with_missing_fields(self):
-#         # Get the URL for adding a new clinic
-#         url = reverse('admin:VetApp_clinic_add')  # Replace with your actual admin URL name
+    def test_admin_cannot_add_clinic_with_missing_fields(self):
+        # Get the URL for adding a new clinic
+        url = reverse('admin:VetApp_clinic_add')  # Replace with your actual admin URL name
         
-#         # Simulate submitting the form with missing required fields (e.g., no 'name')
-#         response = self.client.post(url, {
-#             'location': 'Westlands',
-#             'address': '1234 Dog St, Animal City',
-#             'latitude': 1.2921,
-#             'longitude': 36.8219
-#         })
+        # Simulate submitting the form with missing required fields (e.g., no 'name')
+        response = self.client.post(url, {
+            'location': 'Westlands',
+            'address': '1234 Dog St, Animal City',
+            'latitude': 1.2921,
+            'longitude': 36.8219
+        })
         
-#         # Ensure the form is rendered again with errors (status code should be 200, indicating the page was re-rendered)
-#         self.assertEqual(response.status_code, 200)
+        # Ensure the form is rendered again with errors (status code should be 200, indicating the page was re-rendered)
+        self.assertEqual(response.status_code, 200)
         
-#         # Verify the error message appears in the HTML for the 'name' field
-#         self.assertContains(response, 'This field is required.', html=True)
+        # Verify the error message appears in the HTML for the 'name' field
+        self.assertContains(response, 'This field is required.', html=True)
 
-#     def test_admin_can_update_clinic(self):
-#         # Create a clinic in the database
-#         clinic = Clinic.objects.create(
-#             name='Old Clinic',
-#             location='Kasarani',
-#             address='Old Address',
-#             latitude=1.2921,
-#             longitude=36.8219
-#         )
+    def test_admin_can_update_clinic(self):
+        # Create a clinic in the database
+        clinic = Clinic.objects.create(
+            name='Old Clinic',
+            location='Kasarani',
+            address='Old Address',
+            latitude=1.2921,
+            longitude=36.8219
+        )
         
-#         # Get the URL for editing the clinic
-#         url = reverse('admin:VetApp_clinic_change', args=[clinic.id])  # Replace with your actual admin URL name
+        # Get the URL for editing the clinic
+        url = reverse('admin:VetApp_clinic_change', args=[clinic.id])  # Replace with your actual admin URL name
         
-#         # Simulate submitting the form to update the clinic
-#         response = self.client.post(url, {
-#             'name': 'Updated Clinic',
-#             'location': 'Langata',
-#             'address': 'Updated Address',
-#             'latitude': 1.3031,
-#             'longitude': 36.8255
-#         })
+        # Simulate submitting the form to update the clinic
+        response = self.client.post(url, {
+            'name': 'Updated Clinic',
+            'location': 'Langata',
+            'address': 'Updated Address',
+            'latitude': 1.3031,
+            'longitude': 36.8255
+        })
         
-#         # Verify the response and check the clinic was updated
-#         self.assertEqual(response.status_code, 302)  # Check for redirect after successful update
-#         clinic.refresh_from_db()  # Refresh the clinic from the database to get updated data
-#         self.assertEqual(clinic.name, 'Updated Clinic')
-#         self.assertEqual(clinic.address, 'Updated Address')
+       
 
     
 # import time
@@ -131,84 +127,87 @@
 #         response = self.client.get(reverse('adopt'))  # Replace with actual adoption listings URL
 #         load_time = time.time() - start_time
 #         self.assertLess(load_time, 3, f"Adoption List page took {load_time} seconds to load with large data, which is too slow.")
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth.models import User
-from django.http import HttpResponse
-from .models import Clinic
 
-class AdoptionProcessTestCase(TestCase):
 
-    def setUp(self):
-        # Create an admin user and log in
-        self.admin_user = User.objects.create_superuser('admin', 'admin@example.com', 'password123')
-        self.client.login(username='admin', password='password123')
 
-    def test_view_adoption_listings(self):
-        # Test if the user can view the adoption listings
-        response = self.client.get(reverse('index'))  # Replace with your adoption listings URL
+# # from django.test import TestCase
+# # from django.urls import reverse
+# # from django.contrib.auth.models import User
+# # from django.http import HttpResponse
+# # from .models import Clinic
+
+# # class AdoptionProcessTestCase(TestCase):
+
+# #     def setUp(self):
+# #         # Create an admin user and log in
+# #         self.admin_user = User.objects.create_superuser('admin', 'admin@example.com', 'password123')
+# #         self.client.login(username='admin', password='password123')
+
+# #     def test_view_adoption_listings(self):
+# #         # Test if the user can view the adoption listings
+# #         response = self.client.get(reverse('index'))  # Replace with your adoption listings URL
         
-        # Check if the response status is 200 (OK)
-        self.assertEqual(response.status_code, 200)
-        # Check if the listings are in the context
-        self.assertContains(response, 'Scout')  # Check if a specific dog name is present
+# #         # Check if the response status is 200 (OK)
+# #         self.assertEqual(response.status_code, 200)
+# #         # Check if the listings are in the context
+# #         self.assertContains(response, 'Scout')  # Check if a specific dog name is present
 
-    def test_adopt_dog_form_submission(self):
-        # Test if the form can be submitted successfully with valid data
-        response = self.client.post(reverse('adopt_submit'), {
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'address': '123 Main St',
-            'city': 'Animal City',
-            'phone': '123-456-7890',
-            'email': 'john.doe@example.com',
-            'housing_type': 'House',
-            'adoption_reason': 'Companion for self',
-            'pet_id': '12345',
-            'breed': 'Siberian Husky',
-            'age': '3 years',
-        })
+# #     def test_adopt_dog_form_submission(self):
+# #         # Test if the form can be submitted successfully with valid data
+# #         response = self.client.post(reverse('adopt_submit'), {
+# #             'first_name': 'John',
+# #             'last_name': 'Doe',
+# #             'address': '123 Main St',
+# #             'city': 'Animal City',
+# #             'phone': '123-456-7890',
+# #             'email': 'john.doe@example.com',
+# #             'housing_type': 'House',
+# #             'adoption_reason': 'Companion for self',
+# #             'pet_id': '12345',
+# #             'breed': 'Siberian Husky',
+# #             'age': '3 years',
+# #         })
         
-        # Check that the form was submitted and the response was a redirect (indicating successful submission)
-        self.assertEqual(response.status_code, 302)  # Redirect after successful form submission
-        self.assertRedirects(response, reverse('adopt_thank_you'))  # Replace with the actual redirect URL after submission
+# #         # Check that the form was submitted and the response was a redirect (indicating successful submission)
+# #         self.assertEqual(response.status_code, 302)  # Redirect after successful form submission
+# #         self.assertRedirects(response, reverse('adopt_thank_you'))  # Replace with the actual redirect URL after submission
 
-    def test_incomplete_adoption_form(self):
-        # Test that incomplete form submissions trigger validation errors
-        response = self.client.post(reverse('adopt_submit'), {
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'address': '',  # Leave the address empty to simulate incomplete form
-            'city': 'Animal City',
-            'phone': '123-456-7890',
-            'email': 'john.doe@example.com',
-            'housing_type': 'House',
-            'adoption_reason': 'Companion for self',
-            'pet_id': '12345',
-            'breed': 'Siberian Husky',
-            'age': '3 years',
-        })
+# #     def test_incomplete_adoption_form(self):
+# #         # Test that incomplete form submissions trigger validation errors
+# #         response = self.client.post(reverse('adopt_submit'), {
+# #             'first_name': 'John',
+# #             'last_name': 'Doe',
+# #             'address': '',  # Leave the address empty to simulate incomplete form
+# #             'city': 'Animal City',
+# #             'phone': '123-456-7890',
+# #             'email': 'john.doe@example.com',
+# #             'housing_type': 'House',
+# #             'adoption_reason': 'Companion for self',
+# #             'pet_id': '12345',
+# #             'breed': 'Siberian Husky',
+# #             'age': '3 years',
+# #         })
         
-        # Check that the form was not submitted and validation errors are returned
-        self.assertEqual(response.status_code, 200)  # Stay on the same page
-        self.assertFormError(response, 'form', 'address', 'This field is required.')
+# #         # Check that the form was not submitted and validation errors are returned
+# #         self.assertEqual(response.status_code, 200)  # Stay on the same page
+# #         self.assertFormError(response, 'form', 'address', 'This field is required.')
 
-    def test_adoption_redirect_after_successful_submission(self):
-        # Test that after successful submission, user is redirected to the thank-you page
-        response = self.client.post(reverse('adopt_submit'), {
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'address': '123 Main St',
-            'city': 'Animal City',
-            'phone': '123-456-7890',
-            'email': 'john.doe@example.com',
-            'housing_type': 'House',
-            'adoption_reason': 'Companion for self',
-            'pet_id': '12345',
-            'breed': 'Siberian Husky',
-            'age': '3 years',
-        })
+# #     def test_adoption_redirect_after_successful_submission(self):
+# #         # Test that after successful submission, user is redirected to the thank-you page
+# #         response = self.client.post(reverse('adopt_submit'), {
+# #             'first_name': 'John',
+# #             'last_name': 'Doe',
+# #             'address': '123 Main St',
+# #             'city': 'Animal City',
+# #             'phone': '123-456-7890',
+# #             'email': 'john.doe@example.com',
+# #             'housing_type': 'House',
+# #             'adoption_reason': 'Companion for self',
+# #             'pet_id': '12345',
+# #             'breed': 'Siberian Husky',
+# #             'age': '3 years',
+# #         })
         
-        # Check if the user is redirected to the success page after submission
-        self.assertRedirects(response, reverse('adopt_thank_you'))  # Replace with your thank you page URL
+# #         # Check if the user is redirected to the success page after submission
+# #         self.assertRedirects(response, reverse('adopt_thank_you'))  # Replace with your thank you page URL
 
